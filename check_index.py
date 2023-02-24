@@ -119,6 +119,7 @@ with open(REMOTE_KEY, "r") as key:
                 incorrect_table = []
 
                 for table in table_data:
+                    
                     search = [table2 for table2 in table_data2 if table[0] == table2[0] and table[1] != table2[1]]
 
                     if len(search) > 0:
@@ -131,19 +132,22 @@ with open(REMOTE_KEY, "r") as key:
 
                     index_data = cur.fetchall()
                     index_data2 = cur2.fetchall()
-                
-                    missing_index = []
-                    for index in index_data:
-                        search = [index2 for index2 in index_data2 if index[0] != index2[0]]
 
-                        if len(search) > 0:
-                            print(f"missing index {search[0][0]} in schema: {schema}, table: {table}")
-                            missing_index.append(index)
+                    index = [[idx[0], idx[1]] for idx in index_data]
+                    index2 = [[idx2[0], idx2[1]] for idx2 in index_data2]
+
+                    missing_index = []
+                    for idx in index:
+                        if idx not in index2:
+                            print(f"missing index {idx[0]} in schema: {schema}, table: {table}")
+                            missing_index.append(idx)
 
                     failed_index = []
                     for indexes in missing_index:
                         print(f"Create missing index {indexes[0]}")
                         index_query = indexes[1]
+
+                        
 
                         try:
                             cur2.execute(index_query)
@@ -151,9 +155,17 @@ with open(REMOTE_KEY, "r") as key:
                             # pass exception to function
                             print_psycopg2_exception(err)
 
-                            failed_index.append(indexes)
+                            failed = {
+                                "name": indexes[0], 
+                                "sql": indexes[1],
+                                "error": str(err)
+                            }
+
+                            failed_index.append(failed)
                             # rollback the previous transaction before starting another
                             conn2.rollback()  
+
+                            print()
 
                     createJson.append({
                         "database": database,
@@ -180,7 +192,6 @@ with open(REMOTE_KEY, "r") as key:
             else:
                 with open(f"missing_index_{NEW_INSTANCE}.json", "w") as missing_data:
                     json.dump(createJson, missing_data, ensure_ascii=False, indent=4)
-            
         else:
             print(f'no index error found in {database}')
 
