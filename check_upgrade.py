@@ -85,11 +85,11 @@ with open(REMOTE_KEY, "r") as key:
     if len(replication_count) > 0:
         print("Drop replication here")
 
-        cur.execute(replication_checker)
-        replication_count = cur.fetchall()
+        # cur.execute(replication_checker)
+        # replication_count = cur.fetchall()
 
-        if len(replication_count) > 0:
-            print("Drop replication failed please try again")
+        # if len(replication_count) > 0:
+        #     print("Drop replication failed please try again")
 
     cur.execute(unknown_data_type_checker)
     unknown_dtype = cur.fetchall()
