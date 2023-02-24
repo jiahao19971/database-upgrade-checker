@@ -123,8 +123,7 @@ with open(REMOTE_KEY, "r") as key:
                 for table2 in table_size2:
                     if table[0] == table2[0] and table[1] == table2[1]:
                         if table[2] != table2[2]:
-                            print(f"incorrect data size for schema: {table[0]}, table: {table[1]}") 
-                            
+                            print(f"incorrect data size for schema: {table[0]}, table: {table[1]}")                
            
     cur.close()
     cur2.close()
