@@ -180,18 +180,19 @@ with open(REMOTE_KEY, "r") as key:
 
             files = [f.name for f in os.scandir("./")]
 
-            if file_name in files:
-                with open(file_name, "r") as data:
-                    data_file = json.loads(data.read())
+            if len(createJson) > 0:
+                if file_name in files:
+                    with open(file_name, "r") as data:
+                        data_file = json.loads(data.read())
 
-                    for each in createJson:
-                        data_file.append(each)
+                        for each in createJson:
+                            data_file.append(each)
 
+                        with open(f"missing_index_{NEW_INSTANCE}.json", "w") as missing_data:
+                            json.dump(data_file, missing_data, ensure_ascii=False, indent=4)
+                else:
                     with open(f"missing_index_{NEW_INSTANCE}.json", "w") as missing_data:
-                        json.dump(data_file, missing_data, ensure_ascii=False, indent=4)
-            else:
-                with open(f"missing_index_{NEW_INSTANCE}.json", "w") as missing_data:
-                    json.dump(createJson, missing_data, ensure_ascii=False, indent=4)
+                        json.dump(createJson, missing_data, ensure_ascii=False, indent=4)
         else:
             print(f'no index error found in {database}')
 

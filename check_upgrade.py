@@ -65,7 +65,14 @@ with open(REMOTE_KEY, "r") as key:
 
     unknown_data_type_checker = "SELECT DISTINCT data_type FROM information_schema.columns WHERE data_type ILIKE 'unknown';"
 
+    show_all_db = "SELECT datname FROM pg_database WHERE datistemplate = false;"
+
     cur = conn.cursor()
+
+    cur.execute(show_all_db)
+    all_db = cur.fetchall()
+
+    print(all_db)
 
     cur.execute(transaction_checker)
     transaction_count = cur.fetchall()
