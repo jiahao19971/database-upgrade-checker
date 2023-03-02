@@ -12,19 +12,19 @@ start() {
 
     for DATABASE in "${DB[@]}"
     do
-        bucardo add db ${DATABASE}_source dbhost=$SOURCE_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
+        bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_source dbhost=$SOURCE_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
 
-        bucardo add db ${DATABASE}_dest dbhost=$DEST_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
+        bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_dest dbhost=$DEST_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
 
-        bucardo add table all --db=${DATABASE}_source --herd=${DATABASE}_herd;
+        bucardo --db-pass $BUCARDO_PASSWORD add table all --db=${DATABASE}_source --herd=${DATABASE}_herd;
 
-        bucardo add sequence all --db=${DATABASE}_source --herd=${DATABASE}_herd;
+        bucardo --db-pass $BUCARDO_PASSWORD add sequence all --db=${DATABASE}_source --herd=${DATABASE}_herd;
 
-        bucardo add dbgroup ${DATABASE}_group;
-        bucardo add dbgroup ${DATABASE}_group ${DATABASE}_source:source;
-        bucardo add dbgroup ${DATABASE}_group ${DATABASE}_dest:source;
+        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group;
+        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_source:source;
+        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_dest:source;
 
-        bucardo add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
+        bucardo --db-pass $BUCARDO_PASSWORD add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
     done
 
     bucardo --db-pass $BUCARDO_PASSWORD start;
@@ -34,7 +34,7 @@ stop() {
     echo "hello"
     for DATABASE in "${DB[@]}"
     do
-        bucardo deactivate sync ${DATABASE}_sync; 
+        bucardo --db-pass $BUCARDO_PASSWORD deactivate sync ${DATABASE}_sync; 
     done
     bucardo --db-pass $BUCARDO_PASSWORD stop;
 }
@@ -43,17 +43,17 @@ cleanup() {
     echo "remove"
     for DATABASE in "${DB[@]}"
     do
-        bucardo deactivate sync ${DATABASE}_sync;
-        bucardo delete sync ${DATABASE}_sync;
+        bucardo --db-pass $BUCARDO_PASSWORD deactivate sync ${DATABASE}_sync;
+        bucardo --db-pass $BUCARDO_PASSWORD delete sync ${DATABASE}_sync;
 
-        echo "yes" |  bucardo delete table all --db=${DATABASE}_source;
-        echo "yes" |  bucardo delete sequence all --db=${DATABASE}_source;
+        echo "yes" |  bucardo --db-pass $BUCARDO_PASSWORD delete table all --db=${DATABASE}_source;
+        echo "yes" |  bucardo --db-pass $BUCARDO_PASSWORD delete sequence all --db=${DATABASE}_source;
 
-        bucardo delete relgroup ${DATABASE}_herd;
-        bucardo delete dbgroup ${DATABASE}_group;
+        bucardo --db-pass $BUCARDO_PASSWORD delete relgroup ${DATABASE}_herd;
+        bucardo --db-pass $BUCARDO_PASSWORD delete dbgroup ${DATABASE}_group;
         
-        bucardo delete db ${DATABASE}_source;
-        bucardo delete db ${DATABASE}_dest;
+        bucardo --db-pass $BUCARDO_PASSWORD delete db ${DATABASE}_source;
+        bucardo --db-pass $BUCARDO_PASSWORD delete db ${DATABASE}_dest;
     done
 }
 
