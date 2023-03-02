@@ -6,9 +6,9 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 start() {
-    PGPASSWORD=$PASSWORD psql -h ${SOURCE_HOST} -U ${USERNAME} postgres -c "CREATE EXTENSION plperl;"
+    PGPASSWORD=$PASSWORD psql -h $SOURCE_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
 
-    PGPASSWORD=$PASSWORD psql -h ${DEST_HOST} -U ${USERNAME} postgres -c "CREATE EXTENSION plperl;"
+    PGPASSWORD=$PASSWORD psql -h $DEST_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
 
     for DATABASE in "${DB[@]}"
     do
