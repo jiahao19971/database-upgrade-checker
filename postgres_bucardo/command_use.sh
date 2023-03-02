@@ -5,7 +5,7 @@ if ! [ $(id -u) = 0 ]; then
    exit 1
 fi
 
-start() {
+initial() {
     PGPASSWORD=$PASSWORD psql -h $SOURCE_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
 
     PGPASSWORD=$PASSWORD psql -h $DEST_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
@@ -26,12 +26,19 @@ start() {
 
         bucardo --db-pass $BUCARDO_PASSWORD add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
     done
+}
 
+start() {
+    echo "starting..."
+    for DATABASE in "${DB[@]}"
+    do
+        bucardo --db-pass $BUCARDO_PASSWORD activate sync ${DATABASE}_sync; 
+    done
     bucardo --db-pass $BUCARDO_PASSWORD start;
 }
 
 stop() {
-    echo "hello"
+    echo "stopping..."
     for DATABASE in "${DB[@]}"
     do
         bucardo --db-pass $BUCARDO_PASSWORD deactivate sync ${DATABASE}_sync; 
@@ -60,6 +67,11 @@ cleanup() {
 
 # Argument Handler
 case "$1" in
+initial)
+    initial
+    start
+;;
+
 start)
     start
 ;;
