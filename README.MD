@@ -1,5 +1,7 @@
 
+Things to run before setting up bucardo bucardo_permission.py and check_upgrade.py and migration.py
 
+Migration to be done on BE level to swap all table and alter id 
 
 ```
 REMOTE_HOST=<tunnel host>
