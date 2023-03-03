@@ -12,3 +12,8 @@ OLD_INSTANCE=<old rds db instance>
 NEW_INSTANCE=<new rds db instance that u migrated>
 DATABASE=<all the database that u need to check the index on (use , to separate each database)>
 ```
+
+
+TO DO LIST
+- Create a centralize class to call the tunnel and postgres
+- Update single operation script to a cluster 
