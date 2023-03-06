@@ -61,6 +61,7 @@ def main():
             print("Equal amount of table")
 
             for table in tb:
+                ## Count does not work for hugh table -> can test with live tuples or table size 
                 count_table = f'SELECT count(*) FROM "{table[1]}"."{table[2]}";'
 
                 cur.execute(count_table)
