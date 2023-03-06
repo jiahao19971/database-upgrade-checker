@@ -1,9 +1,21 @@
 #!/bin/bash
+# Add Environment Variable at the top 
+# export SOURCE_HOST="main intance to migrate db"
+# export DEST_HOST="db migrated from main instance"
+# export PORT="postgres port"
+# export USERNAME="Postgres database username"
+# export PASSWORD="Postgres database password"
+# export BUCARDO_PASSWORD="bucardo database password"
+# export DB=("database name" "database name")
 
 if ! [ $(id -u) = 0 ]; then
    echo "The script need to be run as root." >&2
    exit 1
 fi
+
+test() {
+    echo $DATABASE
+}
 
 initial() {
     PGPASSWORD=$PASSWORD psql -h $SOURCE_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
@@ -85,8 +97,12 @@ cleanup)
     cleanup
 ;;
 
+test)
+    test
+;;
+
 *)
-    echo "Usage: $0 {start|stop|cleanup}"
+    echo "Usage: $0 {start|stop|cleanup|initial|test}"
     exit 1
 esac
 
