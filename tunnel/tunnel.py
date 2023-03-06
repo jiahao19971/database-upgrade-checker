@@ -20,7 +20,7 @@ class Tunneler():
         self.logger = logging.getLogger("PGUpgrader")
         logs = self._check_logger()
         self.logger.setLevel(self._evaluate_logger(logs))
-        self.logger.info("Tunnel Initialize")
+        self.logger.info(f"Tunnel Initialize: {instance}")
         self.remote_host=self._get_remote_host()
         self.remote_port=self._get_remote_port()
         self.remote_username=self._get_remote_username()

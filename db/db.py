@@ -16,7 +16,7 @@ class DBLoader():
       
     def __init__(self, server, database):
         self.logger = logging.getLogger("PGUpgrader")
-        self.logger.info(f"Database {database} Initialize")
+        self.logger.info(f"Database {database} Initialize: {server._remote_binds[0][0]}")
         self.db_user=self._get_database_username()
         self.db_pass=self._get_database_password()
         self.database = database 
