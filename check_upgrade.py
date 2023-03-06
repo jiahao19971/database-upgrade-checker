@@ -1,46 +1,25 @@
-from sshtunnel import SSHTunnelForwarder
 from dotenv import load_dotenv
-import os, io
-import paramiko
-import psycopg2
+import os
+from tunnel.tunnel import Tunneler
+from db.db import DBLoader
 
 load_dotenv()
-REMOTE_HOST=os.environ['REMOTE_HOST']
-REMOTE_USERNAME=os.environ['REMOTE_USERNAME']
-REMOTE_KEY=os.environ['REMOTE_KEY']
 DATABASE=os.environ['DATABASE']
-USERNAME=os.environ['USERNAME']
-PWD=os.environ['PASSWORD']
 OLD_INSTANCE=os.environ['OLD_INSTANCE']
 
-with open(REMOTE_KEY, "r") as key:
-    SSH_KEY=key.read()
+def main():
+    server = Tunneler(OLD_INSTANCE, 5432)
 
-    # pass key to parmiko to get your pkey
-    pkey = paramiko.RSAKey.from_private_key(io.StringIO(SSH_KEY))
+    server = server.connect()
 
-    server = SSHTunnelForwarder(
-        (REMOTE_HOST, 22), 
-        ssh_username=REMOTE_USERNAME, 
-        ssh_pkey=pkey, 
-        host_pkey_directories="./",
-        allow_agent=False,
-        remote_bind_address=(OLD_INSTANCE, 5432), 
-        local_bind_address=('localhost', 1234)
-    )
     server.start()
 
     to_arr_db = DATABASE.split(",")
 
     database = to_arr_db[0]
 
-    conn = psycopg2.connect(
-        database=database,
-        user=USERNAME,
-        host=server.local_bind_host,
-        port=server.local_bind_port,
-        password=PWD
-    )
+    conn = DBLoader(server, database)
+    conn = conn.connect()
 
     transaction_checker = "SELECT count(*) FROM pg_catalog.pg_prepared_xacts;"
 
@@ -103,3 +82,5 @@ with open(REMOTE_KEY, "r") as key:
     cur.close()
     conn.commit()
 
+if __name__ == "__main__":
+    main()

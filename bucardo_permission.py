@@ -1,16 +1,9 @@
-from sshtunnel import SSHTunnelForwarder
 from dotenv import load_dotenv
-import os, io
-import paramiko
-import psycopg2, sys
+import os, sys
+from tunnel.tunnel import Tunneler
+from db.db import DBLoader
 
 load_dotenv()
-REMOTE_HOST=os.environ['REMOTE_HOST']
-REMOTE_PORT=int(os.environ['REMOTE_PORT'])
-REMOTE_USERNAME=os.environ['REMOTE_USERNAME']
-REMOTE_KEY=os.environ['REMOTE_KEY']
-USERNAME=os.environ['USERNAME']
-PWD=os.environ['PASSWORD']
 OLD_INSTANCE=os.environ['OLD_INSTANCE']
 DATABASE=os.environ['DATABASE']
 
@@ -52,33 +45,18 @@ grant_replication_role = "grant execute on function rds_session_replication_role
 
 grant_postgres_superuser = "grant rds_superuser to postgres;"
 
-with open(REMOTE_KEY, "r") as key:
-    SSH_KEY=key.read()
+def main():
+    server = Tunneler(OLD_INSTANCE, 5432)
 
-    # pass key to parmiko to get your pkey
-    pkey = paramiko.RSAKey.from_private_key(io.StringIO(SSH_KEY))
+    server = server.connect()
 
-    server = SSHTunnelForwarder(
-        (REMOTE_HOST, 22), 
-        ssh_username=REMOTE_USERNAME, 
-        ssh_pkey=pkey, 
-        host_pkey_directories="./",
-        allow_agent=False,
-        remote_bind_address=(OLD_INSTANCE, 5432), 
-        local_bind_address=('localhost', 1234)
-    )
     server.start()
 
     to_arr_db = DATABASE.split(",")
 
     for database in to_arr_db:
-        conn = psycopg2.connect(
-                database=database,
-                user=USERNAME,
-                host=server.local_bind_host,
-                port=server.local_bind_port,
-                password=PWD
-            )
+        conn = DBLoader(server, database)
+        conn = conn.connect()
         
         cur = conn.cursor()
 
@@ -95,3 +73,6 @@ with open(REMOTE_KEY, "r") as key:
         conn.commit()
 
         conn.close()
+
+if __name__ == "__main__":
+    main()

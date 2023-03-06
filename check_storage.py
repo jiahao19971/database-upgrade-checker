@@ -1,17 +1,11 @@
-from sshtunnel import SSHTunnelForwarder
 from dotenv import load_dotenv
-import os, io
-import paramiko
-import psycopg2, json, sys, re
+import os, sys
+from tunnel.tunnel import Tunneler
+from db.db import DBLoader
+
 
 load_dotenv()
-REMOTE_HOST=os.environ['REMOTE_HOST']
-REMOTE_PORT=int(os.environ['REMOTE_PORT'])
-REMOTE_USERNAME=os.environ['REMOTE_USERNAME']
-REMOTE_KEY=os.environ['REMOTE_KEY']
 DATABASE=os.environ['DATABASE']
-USERNAME=os.environ['USERNAME']
-PWD=os.environ['PASSWORD']
 OLD_INSTANCE=os.environ['OLD_INSTANCE']
 NEW_INSTANCE=os.environ['NEW_INSTANCE']
 
@@ -31,51 +25,26 @@ def print_psycopg2_exception(err):
     print ("pgerror:", err.pgerror)
     print ("pgcode:", err.pgcode, "\n")
 
-with open(REMOTE_KEY, "r") as key:
-    SSH_KEY=key.read()
+def main():
+    server = Tunneler(OLD_INSTANCE, 5432)
 
-    # pass key to parmiko to get your pkey
-    pkey = paramiko.RSAKey.from_private_key(io.StringIO(SSH_KEY))
+    server = server.connect()
 
-    server = SSHTunnelForwarder(
-        (REMOTE_HOST, 22), 
-        ssh_username=REMOTE_USERNAME, 
-        ssh_pkey=pkey, 
-        host_pkey_directories="./",
-        allow_agent=False,
-        remote_bind_address=(OLD_INSTANCE, 5432), 
-        local_bind_address=('localhost', 1234)
-    )
     server.start()
 
-    server2 = SSHTunnelForwarder(
-        (REMOTE_HOST, 22), 
-        ssh_username=REMOTE_USERNAME, 
-        ssh_pkey=pkey, 
-        host_pkey_directories="./",
-        allow_agent=False,
-        remote_bind_address=(NEW_INSTANCE, 5432), 
-        local_bind_address=('localhost', 3456)
-    )
+    server2 = Tunneler(NEW_INSTANCE, 5432)
+
+    server2 = server2.connect()
+
     server2.start()
 
     to_arr_db = DATABASE.split(",")
 
     for database in to_arr_db:
-        conn = psycopg2.connect(
-            database=database,
-            user=USERNAME,
-            host=server.local_bind_host,
-            port=server.local_bind_port,
-            password=PWD
-        )
-        conn2 = psycopg2.connect(
-            database=database,
-            user=USERNAME,
-            host=server2.local_bind_host,
-            port=server2.local_bind_port,
-            password=PWD
-        )
+        conn = DBLoader(server, database)
+        conn = conn.connect()
+        conn2 = DBLoader(server2, database)
+        conn2 = conn2.connect()
 
         cur = conn.cursor()
         cur2 = conn2.cursor()
@@ -166,3 +135,6 @@ with open(REMOTE_KEY, "r") as key:
     
     # conn.commit()
     # conn2.commit()
+
+if __name__ == "__main__":
+    main()
