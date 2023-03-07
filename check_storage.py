@@ -53,7 +53,7 @@ def main():
                                 select
                                     table_schema,
                                     table_name,
-                                    pg_total_relation_size('"'||table_schema||'"."'||table_name||'"')
+                                    pg_relation_size('"'||table_schema||'"."'||table_name||'"')
                                 from information_schema.tables
                                 where table_schema NOT LIKE 'pg_%' AND table_schema != 'bucardo' AND table_schema != 'information_schema' AND table_name not like 'pg%';
                             """
@@ -84,18 +84,6 @@ def main():
                                 print(f'nothing wrong with table: "{table[0]}"."{table[1]}" after checking on count')   
                         except Exception as err:
                             print(err)
-
-        # for table in table_size:
-        #     index_size = f'SELECT pg_indexes_size("{table[0]}"."{table[1]}")'
-
-        #     cur.execute(index_size)
-        #     cur2.execute(index_size)
-
-        #     index_count = cur.fetchall()
-        #     index_count2 = cur2.fetchall()
-
-        #     print(index_count)
-        #     print(index_count2)
 
         
     cur.close()
