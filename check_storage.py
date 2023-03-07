@@ -50,22 +50,12 @@ def main():
         cur2 = conn2.cursor()
 
         table_size_checker = """
-                                SELECT
-                                    schema_name,
-                                    relname,
-                                    table_size
-
-                                    FROM (
-                                        SELECT
-                                            pg_catalog.pg_namespace.nspname           AS schema_name,
-                                            relname,
-                                            pg_relation_size(pg_catalog.pg_class.oid) AS table_size
-
-                                        FROM pg_catalog.pg_class
-                                            JOIN pg_catalog.pg_namespace ON relnamespace = pg_catalog.pg_namespace.oid
-                                        ) t
-                                    WHERE schema_name NOT LIKE 'pg_%' AND schema_name != 'bucardo' AND schema_name != 'information_schema' AND relname not like 'pg%'
-                                    ORDER BY table_size DESC;
+                                select
+                                    table_schema,
+                                    table_name,
+                                    pg_total_relation_size('"'||table_schema||'"."'||table_name||'"')
+                                from information_schema.tables
+                                where table_schema NOT LIKE 'pg_%' AND table_schema != 'bucardo' AND table_schema != 'information_schema' AND table_name not like 'pg%';
                             """
 
         cur.execute(table_size_checker)
@@ -81,16 +71,33 @@ def main():
                         print(f"incorrect data size for schema: {table[0]}, table: {table[1]}")   
 
                         count_table = f'SELECT count(*) FROM "{table[0]}"."{table[1]}"'
-                        cur.execute(count_table)
-                        cur2.execute(count_table)
+                        try:
+                            cur.execute(count_table)
+                            cur2.execute(count_table)
 
-                        table_count = cur.fetchall()
-                        table_count2 = cur2.fetchall()
+                            table_count = cur.fetchall()
+                            table_count2 = cur2.fetchall()
 
-                        if table_count[0][0] != table_count2[0][0]:
-                            print(f'something is wrong with table: "{table[0]}"."{table[1]}"') 
-                        else:
-                            print(f'nothing wrong with table: "{table[0]}"."{table[1]}" after checking on count')   
+                            if table_count[0][0] != table_count2[0][0]:
+                                print(f'something is wrong with table: "{table[0]}"."{table[1]}"') 
+                            else:
+                                print(f'nothing wrong with table: "{table[0]}"."{table[1]}" after checking on count')   
+                        except Exception as err:
+                            print(err)
+
+        # for table in table_size:
+        #     index_size = f'SELECT pg_indexes_size("{table[0]}"."{table[1]}")'
+
+        #     cur.execute(index_size)
+        #     cur2.execute(index_size)
+
+        #     index_count = cur.fetchall()
+        #     index_count2 = cur2.fetchall()
+
+        #     print(index_count)
+        #     print(index_count2)
+
+        
     cur.close()
     cur2.close()
     conn.commit()

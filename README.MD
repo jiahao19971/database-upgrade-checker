@@ -15,7 +15,16 @@ NEW_INSTANCE=<new rds db instance that u migrated>
 DATABASE=<all the database that u need to check the index on (use , to separate each database)>
 ```
 
-
 TO DO LIST
 - Create a centralize class to call the tunnel and postgres
 - Update single operation script to a cluster 
+
+
+Add these to your dotfile
+
+```
+export PATH=$PATH:./bin
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+export PYTHONIOENCODING='UTF-8'
+```
