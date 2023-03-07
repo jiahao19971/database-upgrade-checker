@@ -4,7 +4,6 @@
 # export PORT="Postgres database port"
 # export USERNAME="Postgres database username"
 # export PASSWORD="Postgres database password"
-# export BUCARDO_PASSWORD="Bucardo database password"
 # export DB=("database name" "database name")
 
 for DATABASE in "${DB[@]}"
