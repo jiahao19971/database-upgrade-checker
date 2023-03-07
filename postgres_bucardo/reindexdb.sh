@@ -1,10 +1,10 @@
 #!/bin/bash
-# Add Environment Variable at the top 
-# export HOST="Postgres database host to run vacuumdb"
-# export PORT="Postgres database port"
-# export USERNAME="Postgres database username"
-# export PASSWORD="Postgres database password"
-# export DB=("database name" "database name")
+export HOST=fave-staging-fnb-pg-v11-bucardo.cpjcuh9nrfdg.ap-southeast-1.rds.amazonaws.com
+export PORT=5432
+export USERNAME=postgres
+export PASSWORD=noddy-natty-friend-torr
+export BUCARDO_PASSWORD=bucardo-runner
+export DB=("kfit_app_staging" "fave_admin" "fave_dealivery" "fastpay_staging")
 
 for DATABASE in "${DB[@]}"
 do
