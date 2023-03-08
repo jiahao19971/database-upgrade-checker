@@ -77,10 +77,8 @@ cleanup() {
 
 
 resetdb() {
-    su - postgres -c "psql postgres <<EOF
-        \x
-        DROP DATABASE bucardo; CREATE DATABASE bucardo;
-    EOF";
+    su - postgres -c "psql postgres -c 'DROP DATABASE bucardo'";
+    su - postgres -c "psql postgres -c 'CREATE DATABASE bucardo'";
 }
 
 installbucardo() {
