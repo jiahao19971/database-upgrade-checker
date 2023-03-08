@@ -17,10 +17,7 @@ test() {
     echo $DATABASE
 }
 
-initial() {
-    PGPASSWORD=$PASSWORD psql -h $SOURCE_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
-
-    PGPASSWORD=$PASSWORD psql -h $DEST_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
+setup() {
 
     for DATABASE in "${DB[@]}"
     do
@@ -35,6 +32,7 @@ initial() {
         bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group;
         bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_source:source;
         bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_dest:source;
+        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_copy:target;
 
         bucardo --db-pass $BUCARDO_PASSWORD add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
     done
@@ -74,13 +72,34 @@ cleanup() {
         bucardo --db-pass $BUCARDO_PASSWORD delete db ${DATABASE}_source;
         bucardo --db-pass $BUCARDO_PASSWORD delete db ${DATABASE}_dest;
     done
+
+    
 }
 
+
+resetdb() {
+    su - postgres -c "psql postgres <<EOF
+        \x
+        DROP DATABASE bucardo; CREATE DATABASE bucardo;
+    EOF";
+}
+
+installbucardo() {
+    bucardo install --batch
+}
+
+setupExtension() {
+    PGPASSWORD=$PASSWORD psql -h $SOURCE_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
+
+    PGPASSWORD=$PASSWORD psql -h $DEST_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
+}
 
 # Argument Handler
 case "$1" in
 initial)
-    initial
+    installbucardo
+    setupExtension
+    setup
     start
 ;;
 
@@ -95,6 +114,7 @@ stop)
 cleanup)
     stop
     cleanup
+    resetdb
 ;;
 
 test)
