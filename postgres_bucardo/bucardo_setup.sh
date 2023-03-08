@@ -82,7 +82,7 @@ resetdb() {
 }
 
 installbucardo() {
-    bucardo install --batch
+    bucardo --db-pass $BUCARDO_PASSWORD install --batch;
 }
 
 setupExtension() {
