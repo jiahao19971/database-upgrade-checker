@@ -27,20 +27,6 @@ reindex() {
     done
 }
 
-benchmarkvacuum() {
-    for DATABASE in "${DB[@]}"
-    do
-        PGPASSWORD="$PASSWORD" pgbench -U $USERNAME -h $HOST -d $DATABASE -c 100 -T 900
-    done
-}
-
-benchmark() {
-    for DATABASE in "${DB[@]}"
-    do
-        PGPASSWORD="$PASSWORD" pgbench -U $USERNAME -h $HOST -d $DATABASE -c 100 -T 900 -n
-    done
-}
-
 # Argument Handler
 case "$1" in
 analyze)
@@ -59,15 +45,7 @@ reindex)
     reindex
 ;;
 
-benchmark)
-    benchmark
-;;
-
-benchmarkvacuum)
-    benchmarkvacuum
-;;
-
 *)
-    echo "Usage: $0 {analyze|check|vacuum|reindex|benchmark|benchmarkvacuum}"
+    echo "Usage: $0 {analyze|check|vacuum|reindex}"
     exit 1
 esac
