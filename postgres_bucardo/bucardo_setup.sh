@@ -24,8 +24,6 @@ setup() {
         count=$(PGPASSWORD=$PASSWORD psql -p $PORT -d $DATABASE  -U $USERNAME -h $SOURCE_HOST -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | grep 0)
 
         if [ -z "$count" ]; then
-            echo "No table found in the database"
-        else 
             bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_source dbhost=$SOURCE_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
 
             bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_dest dbhost=$DEST_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
@@ -39,6 +37,8 @@ setup() {
             bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_dest:source;
 
             bucardo --db-pass $BUCARDO_PASSWORD add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
+        else 
+            echo "No table found in the database"
         fi
     done
 }
