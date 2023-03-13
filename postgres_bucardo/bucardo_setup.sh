@@ -87,10 +87,6 @@ resetdb() {
     su - postgres -c "psql postgres -c 'CREATE DATABASE bucardo'";
 }
 
-installbucardo() {
-    echo $BUCARDO_PASSWORD | bucardo install --batch;
-}
-
 setupExtension() {
     PGPASSWORD=$PASSWORD psql -h $SOURCE_HOST -U $USERNAME postgres -c "CREATE EXTENSION plperl;";
 
@@ -100,7 +96,6 @@ setupExtension() {
 # Argument Handler
 case "$1" in
 initial)
-    installbucardo
     setupExtension
     setup
     start
