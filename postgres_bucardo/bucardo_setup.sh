@@ -21,19 +21,25 @@ setup() {
 
     for DATABASE in "${DB[@]}"
     do
-        bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_source dbhost=$SOURCE_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
+        count=$(PGPASSWORD=$PASSWORD psql -p $PORT -d $DATABASE  -U $USERNAME -h $SOURCE_HOST -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | grep 0)
 
-        bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_dest dbhost=$DEST_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
+        if [ -z "$count" ]; then
+            echo "No table found in the database"
+        else 
+            bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_source dbhost=$SOURCE_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
 
-        bucardo --db-pass $BUCARDO_PASSWORD add table all --db=${DATABASE}_source --herd=${DATABASE}_herd;
+            bucardo --db-pass $BUCARDO_PASSWORD add db ${DATABASE}_dest dbhost=$DEST_HOST dbport=$PORT dbname=$DATABASE dbuser=$USERNAME dbpass=$PASSWORD;
 
-        bucardo --db-pass $BUCARDO_PASSWORD add sequence all --db=${DATABASE}_source --herd=${DATABASE}_herd;
+            bucardo --db-pass $BUCARDO_PASSWORD add table all --db=${DATABASE}_source --herd=${DATABASE}_herd;
 
-        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group;
-        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_source:source;
-        bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_dest:source;
+            bucardo --db-pass $BUCARDO_PASSWORD add sequence all --db=${DATABASE}_source --herd=${DATABASE}_herd;
 
-        bucardo --db-pass $BUCARDO_PASSWORD add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
+            bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group;
+            bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_source:source;
+            bucardo --db-pass $BUCARDO_PASSWORD add dbgroup ${DATABASE}_group ${DATABASE}_dest:source;
+
+            bucardo --db-pass $BUCARDO_PASSWORD add sync ${DATABASE}_sync herd=${DATABASE}_herd dbs=${DATABASE}_group;
+        fi
     done
 }
 
