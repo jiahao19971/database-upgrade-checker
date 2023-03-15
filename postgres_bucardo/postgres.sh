@@ -6,9 +6,16 @@
 # export PASSWORD="Postgres database password"
 # export DB=("database name" "database name")
 
+# Script to run analyze by parts
+# List out all the table required to populate table and run by batches 
+
+# Without ANALYZE trx speed around 1.9k TPS
+# With ANALYZE trx speed around 3.6k TPS (2x the performance gain)
+
 analyze() {
     for DATABASE in "${DB[@]}"
     do
+        ## Check on the percentage of analyze it is performing 
         PGPASSWORD="$PASSWORD" vacuumdb -U $USERNAME -h $HOST -e -j 100 --analyze-in-stages -d $DATABASE
     done
 }
