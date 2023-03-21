@@ -58,10 +58,10 @@ def main():
                 conn.commit()
 
 
-                chg_name = f'ALTER TABLE \"{schema[0]}\".finance_merchant_payment_request_transactions rename to "finance_merchant_payment_request_transaction"'
+                remove_table = f'DROP TABLE \"{schema[0]}\".finance_merchant_payment_request_transactions'
 
                 try:
-                    cur.execute(chg_name)
+                    cur.execute(remove_table)
                 except Exception as err:
                     print(err)
                     conn.rollback()  
