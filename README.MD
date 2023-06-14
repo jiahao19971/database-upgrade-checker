@@ -13,6 +13,7 @@ PASSWORD=<password for postgres>
 OLD_INSTANCE=<old rds db instance>
 NEW_INSTANCE=<new rds db instance that u migrated>
 DATABASE=<all the database that u need to check the index on (use , to separate each database)>
+CREATE_USER=<used for adding iam access only>
 ```
 
 TO DO LIST
